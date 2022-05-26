@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: My template to deploy a vpc and its resources.
+
+Parameters:
+
+  EnvironmentName:
+    Description: The environment name that will be afixed to the resources
+    Type: String
+
+  VpcCIDR:
+    Description: The IP range for the new VPC
+    Type: String
+    Default: 10.0.0.0/16
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
