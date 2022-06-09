@@ -1,0 +1,95 @@
+Parameters:
+  myVPC:
+    Description: My VPC to deploy all the resources below
+    Type: AWS::EC2::VPC::Id
+  ServerSubnet:
+    Description: Subnets for the server
+    Type: AWS::EC2::Subnet::Id
+  AMI:
+    Description: AMi for the instance
+    Type: String
+
+
+
+  # EnvironmentName:
+       # Description: An environment name that will be prefixed to resource names
+        #Type: String
+
+  #pLatestAmiId:
+    #Type: String
+    #Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
+Resources:
+# IAM role allowing EC2 Session Manager to access our server
+  IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: RoleForSSMAccess
+      Description: IAM role allowing EC2 Session Manager to access our server
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+              
+      #Path: /
+      ManagedPolicyArns:
+      #The managed IAM policy AmazonSSMManagedInstanceCore grants access to Session Manager
+        #- !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonSSMmanagedInstanceCore
+      #Policies: []
+
+# Instance profile
+  ServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      #InstanceProfileName: RoleForSSMAccess
+      Roles:
+        - !Ref IAMRole
+
+# security Group
+  WebAccessSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for EC2 Instance
+      VpcId: 
+        Ref: myVPC
+      SecurityGroupEgress:
+        - Description: Allows https outbound to the VPC
+          CidrIp: 0.0.0.0/0
+          FromPort: -1
+          ToPort: -1
+          IpProtocol: -1
+      SecurityGroupIngress:
+        - Description: Allows https outbound to the VPC
+          CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp
+      
+  
+
+# Server EC2 Instance
+  ServerInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !Ref AMI
+      InstanceType: t3.micro
+      IamInstanceProfile: !Ref ServerInstanceProfile
+      NetworkInterfaces:
+        GroupSet:
+          - !Ref WebAccessSecurityGroup
+        SubnetId: !Ref ServerSubnet
+        AssociatePublicAddress: 'true'
+        DeviceIndex: '0'
+
+Outputs:
+   DBSecurityGroup:
+    Description: A reference to the DB security group
+    Value: !Ref DBSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-WebAccessSecurityGroup

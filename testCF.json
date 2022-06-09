@@ -1,0 +1,10 @@
+[
+    {
+        "ParameterKey": "DBEnvName",
+        "ParameterValue": "myVPC"
+    },
+    {
+        "ParameterKey": "AMI",
+        "ParameterValue": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    }
+]

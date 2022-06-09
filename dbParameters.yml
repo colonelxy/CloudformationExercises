@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  DBSubnetGroup1:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties: 
+      DBSubnetGroupDescription: "Subnets to use for the DB"
+      DBSubnetGroupName: "Subnet Group"
+      SubnetIds:
+      - Fn::ImportValue:
+          !Sub "${EnvironmentName}-PrivateSub1"
+      - Fn::ImportValue:
+          !Sub "${EnvironmentName}-PrivateSub2"
+  MyDB: 
+    Type: "AWS::RDS::DBInstance"
+    Properties: 
+      VPCSecurityGroups:
+        - !Ref SomeSecurityGroup
+      PubliclyAccessible: false
+      MultiAZ: false
+      AllocatedStorage: 
+        !Ref DBStorage
+      DBInstanceClass: 
+        !Ref DBInstanceClass
+      Engine: "mysql"
+      MasterUsername: 
+        !Ref DBUsername
+      MasterUserPassword: 
+        !Ref DBPassword
+      Timezone: 'Central Standard Time'
+      DBSubnetGroupName: !Ref DBSubnetGroup1
+      Tags: 
+        - 
+          Key: "Name"
+          Value: !Sub "${EnvironmentName} MS SQL RDS"
+    DeletionPolicy: "Retain"
