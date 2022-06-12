@@ -28,14 +28,14 @@ Parameters:
     Type: String
 
 
-  SSHLocation:
-    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: 0.0.0.0/0
-    Description: The IP address range that can be used to access the web server using SSH.
-    MaxLength: '18'
-    MinLength: '9'
-    Type: String
+  #SSHLocation:
+    #AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    #ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    #Default: 0.0.0.0/0
+    #Description: The IP address range that can be used to access the web server using SSH.
+    #MaxLength: '18'
+    #MinLength: '9'
+    #Type: String
  
 Resources:
   
@@ -235,7 +235,8 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: !Ref SSHLocation
+          #CidrIp: !Ref SSHLocation
+          CidrIp: 0.0.0.0/0
       Tags: 
         - Key: Name
           Value: SSH Security Group
@@ -276,6 +277,15 @@ Resources:
         - Key: Name
           Value: Database Security Group
       VpcId: !Ref VPC
+
+  
+# Creates the ec2 role for the webserver instance
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        -ec2-role-2
 
   WebAppLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -327,7 +337,7 @@ Resources:
   S3Bucket:
     DeletionPolicy: Retain
     Type: AWS::S3::Bucket
-    Description: Creates an S3 bucket
+    #Description: Creates an S3 bucket
     Properties:
       AccessControl: Private
       PublicAccessBlockConfiguration:
@@ -428,7 +438,7 @@ Outputs:
     Description: Application load balancer public url
     Export:
       Name: !Sub ${AWS::StackName}-WebAppLB
-    Value: !Join [ "-", [http://, !GetAtt WebAppLB.DNSName]]
+    Value: !Join [ "", [http://, !GetAtt WebAppLB.DNSName]]
     
   ALBListener:
     Description: ALB Listener
