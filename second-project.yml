@@ -248,8 +248,8 @@ Resources:
       GroupDescription:  Enables HTTP/HTTPS access via port 80/443 locked down to the load balancer SG and ssh security group
       SecurityGroupIngress: 
         - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
+          FromPort: 80
+          ToPort: 80
           SourceSecurityGroupId: !Ref ALBSecurityGroup
         - IpProtocol: tcp
           FromPort: 443
@@ -280,12 +280,55 @@ Resources:
 
   
 # Creates the ec2 role for the webserver instance
-  InstanceProfile:
-    Type: AWS::IAM::InstanceProfile
+  IAMRole:
+    Type: 'AWS::IAM::Role'
     Properties:
-      Path: /
+      RoleName: RoleForSSMAccess
+      Description: IAM role allowing EC2 Session Manager to access our server
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+              
+      #Path: /
+      #The managed IAM policy AmazonSSMManagedInstanceCore grants access to Session Manager
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMmanagedInstanceCore
+      #Policies: []
+
+# Instance profile
+  ServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
       Roles:
-        -ec2-role-2
+        - !Ref IAMRole
+
+  ServerConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: ami-09d56f8956ab235b3
+      KeyName: mainKey
+      SecurityGroups:
+      - Ref: WebServerSecurityGroup
+      InstanceType: t3.small
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdk"
+        Ebs:
+          VolumeSize: '10'
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            apt-get update -y
+            apt-get install apache2 -y
+            systemctl start apache2.service
+            cd /var/www/html
+            echo "Udacity Demo Web Server Up and Running!" > index.html
 
   WebAppLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -295,6 +338,7 @@ Resources:
       - !Ref PublicSub2
       SecurityGroups:
       - Ref: ALBSecurityGroup
+  
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -322,7 +366,8 @@ Resources:
   AppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 10
+      TargetType: instance
+      HealthCheckIntervalSeconds: 15
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 8
