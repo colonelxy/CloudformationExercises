@@ -424,6 +424,30 @@ Outputs:
       Name: !Sub ${AWS::StackName}-DBSecurityGroup
     Value: !Ref DBSecurityGroup
 
+  WebAppLBUrl:
+    Description: Application load balancer public url
+    Export:
+      Name: !Sub ${AWS::StackName}-WebAppLB
+    Value: !Join [ "-", [http://, !GetAtt WebAppLB.DNSName]]
+    
+  ALBListener:
+    Description: ALB Listener
+    Export:
+      Name: !Sub ${AWS::StackName}-ALBListener
+    Value: !Ref ALBListener
+
+  ALBListenerRule:
+    Description: DB security group
+    Export:
+      Name: !Sub ${AWS::StackName}-DBSecurityGroup
+    Value: !Ref DBSecurityGroup
+
+  AppTargetGroup:
+    Description: ALB Listener Rule
+    Export:
+      Name: !Sub ${AWS::StackName}-ALBListenerRule
+    Value: !Ref ALBListenerRule
+
   S3Bucket:
     Description: Template creates a bucket
     Export:
