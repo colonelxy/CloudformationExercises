@@ -322,7 +322,7 @@ Resources:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
       Roles:
-        - !Ref IAMRole
+        - myS3ReadOnlyRole
 
   ServerConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
