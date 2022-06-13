@@ -2,6 +2,19 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: This template creates a VPC with public and private subnets, load balancer, autoscaling group, S3 bucket and servers
 
 Parameters:
+  EnvironmentName:
+    Description: The name to be prefixed to resources
+    Type: String
+
+  AMI:
+    Description: The machine image to be used in the launch
+    Type: String
+
+  InstanceType: 
+    Description: Instance type to use 
+    Type: String
+
+
   VpcCIDR:
     Default: 10.0.0.0/16
     Description: Please enter the Ip range for the VPC
@@ -311,11 +324,11 @@ Resources:
   ServerConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: ami-09d56f8956ab235b3
+      ImageId: !Ref AMI
       KeyName: mainKey
       SecurityGroups:
       - Ref: WebServerSecurityGroup
-      InstanceType: t3.small
+      InstanceType: !Ref InstanceType
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
