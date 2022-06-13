@@ -296,20 +296,20 @@ Resources:
 
   
 # Creates the ec2 role for the webserver instance
-  IAMRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      RoleName: RoleForSSMAccess
-      Description: IAM role allowing EC2 Session Manager to access our server
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Action:
-              - 'sts:AssumeRole'
+  # IAMRole:
+    # Type: 'AWS::IAM::Role'
+    # Properties:
+      # RoleName: RoleForSSMAccess
+      # Description: IAM role allowing EC2 Session Manager to access our server
+      # AssumeRolePolicyDocument:
+        # Version: '2012-10-17'
+        # Statement:
+          # - Effect: Allow
+            # Principal:
+              # Service:
+                # - ec2.amazonaws.com
+            # Action:
+              # - 'sts:AssumeRole'
               
       #Path: /
       #The managed IAM policy AmazonSSMManagedInstanceCore grants access to Session Manager
@@ -332,6 +332,7 @@ Resources:
       SecurityGroups:
       - Ref: WebServerSecurityGroup
       InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref ServerInstanceProfile
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
