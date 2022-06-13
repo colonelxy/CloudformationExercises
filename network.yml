@@ -295,5 +295,43 @@ Resources:
           Value: Database Security Group
       VpcId: !Ref VPC
 
+#Create the launch configurations
+
+  # Instance profile role
+  ServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - myS3ReadOnlyRole
+
+  ServerConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref AMI
+      KeyName: !Ref KeyPair
+      SecurityGroups:
+      - Ref: WebServerSecurityGroup
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref ServerInstanceProfile
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdk"
+        Ebs:
+          VolumeSize: '10'
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            apt-get update -y
+            apt-get install apache2 -y
+            systemctl start apache2.service
+            cd /var/www/html
+            aws s3 cp s3://my-test-bucket-cli-user/index.html > index.html
+            eecho "it works! Udagram, Udacity" > index.html
+#Create the load balancing
+
+
+
+
+
   # Outputs:
     
