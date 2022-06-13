@@ -2,6 +2,14 @@
 [
 	{
 		"ParameterKey": "EnvironmentName",
-		"ParameterValue": "UdacityProject"
+		"ParameterValue": "WebAppLaunch"
+	},
+	{
+		"ParameterKey": "AMI",
+		"ParameterValue": "ami-005de95e8ff495156"
+	},
+	{
+		"ParameterKey": "AutoScalingInstanceType",
+		"ParameterValue": "t2.medium"
 	}
 ]
