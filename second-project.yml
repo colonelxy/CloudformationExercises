@@ -346,8 +346,7 @@ Resources:
             systemctl start apache2.service
             systemctl enable apache2.service
             cd /var/www/html
-            aws s3 cp s3://home/lxmint/Documents/Projects/host.zip
-            unzip -o host.zip
+            aws s3 cp s3://my-test-bucket-cli-user/index.html
             echo "Udacity Demo Web Server Up and Running!" > index.html
 
   WebAppLB:
