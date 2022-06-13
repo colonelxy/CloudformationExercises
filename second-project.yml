@@ -327,6 +327,7 @@ Resources:
       Roles:
         - myS3ReadOnlyRole
 
+#Configure the server
   ServerConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:

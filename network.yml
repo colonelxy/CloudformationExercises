@@ -294,6 +294,7 @@ Resources:
         - Key: Name
           Value: Database Security Group
       VpcId: !Ref VPC
+        
 
 #Create the launch configurations
 
@@ -333,13 +334,13 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSub1, PrivateSub2
+        - !Join [',', [!Ref PrivateSub1, !Ref PrivateSub2 ]]
       LaunchConfigurationName: 
-        -Ref:
+        Ref: ServerConfig
       MinSize: "3"
       MaxSize: "5"
       TargetGroupARNs:
-        - Ref: 
+        - Ref: AppTargetGroup
 
 #Create the load balancing
 
@@ -379,7 +380,7 @@ Resources:
   AppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      TargetType: instance
+      # TargetType: instance
       HealthCheckIntervalSeconds: 15
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
@@ -388,11 +389,15 @@ Resources:
       Port: 8080
       Protocol: HTTP
       UnhealthyThresholdCount: 5
-      VpcId:
-        Fn::ImportValue:
-          Fn::Sub: "${AWS::StackName}-VPC"
+      VpcId: !Ref VPC
+        # -Fn::ImportValue: !Sub "${EnvironmentName}-VPC"
 
 
 
-  # Outputs:
+Outputs:
+  WebAppLBUrl:
+    Description: Application load balancer public url
+    Export:
+      Name: !Sub ${EnvironmentName}-WebAppLBURL
+    Value: !Join [ "", [http://, !GetAtt WebAppLB.DNSName]]
     
