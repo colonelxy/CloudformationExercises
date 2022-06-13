@@ -14,6 +14,9 @@ Parameters:
     Description: Instance type to use 
     Type: String
 
+  KeyPair: 
+    Description: key pair to use 
+    Type: String
 
   VpcCIDR:
     Default: 10.0.0.0/16
@@ -325,7 +328,7 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId: !Ref AMI
-      KeyName: mainKey
+      KeyName: !Ref Keypair
       SecurityGroups:
       - Ref: WebServerSecurityGroup
       InstanceType: !Ref InstanceType
