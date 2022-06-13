@@ -11,5 +11,9 @@
 	{
 		"ParameterKey": "InstanceType",
 		"ParameterValue": "t2.medium"
+	},
+	{
+		"ParameterKey": "KeyPair",
+		"ParameterValue": "mainKey"
 	}
 ]
