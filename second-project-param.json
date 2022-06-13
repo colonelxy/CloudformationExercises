@@ -9,7 +9,7 @@
 		"ParameterValue": "ami-005de95e8ff495156"
 	},
 	{
-		"ParameterKey": "AutoScalingInstanceType",
+		"ParameterKey": "InstanceType",
 		"ParameterValue": "t2.medium"
 	}
 ]
