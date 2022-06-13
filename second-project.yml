@@ -329,6 +329,8 @@ Resources:
             systemctl start apache2.service
             systemctl enable apache2.service
             cd /var/www/html
+            aws s3 cp s3://home/lxmint/Documents/Projects/host.zip
+            unzip -o host.zip
             echo "Udacity Demo Web Server Up and Running!" > index.html
 
   WebAppLB:
@@ -380,23 +382,6 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${AWS::StackName}-VPC"
 
-  S3Bucket:
-    DeletionPolicy: Retain
-    Type: AWS::S3::Bucket
-    #Description: Creates an S3 bucket
-    Properties:
-      AccessControl: Public
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption: 
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      VersioningConfiguration:
-        Status: Enabled
 #AppRole:
     #Type: AWS::IAM::InstanceProfile
     #Properties: 
@@ -504,11 +489,6 @@ Outputs:
       Name: !Sub ${AWS::StackName}-ALBListenerRule
     Value: !Ref ALBListenerRule
 
-  S3Bucket:
-    Description: Template creates a bucket
-    Export:
-      Name: !Sub ${AWS::StackName}-S3Bucket
-    Value: !Ref S3Bucket
   
   
 # Sample UserData
