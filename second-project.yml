@@ -313,11 +313,11 @@ Resources:
               
       #Path: /
       #The managed IAM policy AmazonSSMManagedInstanceCore grants access to Session Manager
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonSSMmanagedInstanceCore
+      # ManagedPolicyArns:
+        # - arn:aws:iam::aws:policy/AmazonSSMmanagedInstanceCore
       #Policies: []
 
-# Instance profile
+# Instance profile role
   ServerInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
