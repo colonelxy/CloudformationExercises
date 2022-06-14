@@ -402,9 +402,19 @@ Resources:
         IndexDocument: index.html
         ErrorDocument: error.html
       DeletionPolicy: Delete
-      
-#Create bucket policy
 
+#Create bucket policy
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3WebBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: s3:*
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'S3WebBucket', '/*']]
+            Principal:
+              AWS: '*'
 
 Outputs:
   WebAppLBUrl:
