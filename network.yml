@@ -326,7 +326,7 @@ Resources:
             apt-get install apache2 -y
             systemctl start apache2.service
             cd /var/www/html
-            aws s3 cp s3://my-test-bucket-cli-user/index.html > index.html
+            aws s3 cp s3://my-test-bucket-cli-user/index.html
             eecho "it works! Udagram, Udacity" > index.html
 
 #Create the autoscaling group
@@ -392,6 +392,18 @@ Resources:
       VpcId: !Ref VPC
         # -Fn::ImportValue: !Sub "${EnvironmentName}-VPC"
 
+#Create S3 bucket
+  S3WebBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${EnvironmentName}-Bucket"
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+      DeletionPolicy: Delete
+      
+#Create bucket policy
 
 
 Outputs:
