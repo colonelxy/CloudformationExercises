@@ -298,12 +298,35 @@ Resources:
 
 #Create the launch configurations
 
+#Create role policy
+  S3ReadOnlyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 's3:Get'
+                Resource: !Sub "arn:${AWS::Partition}:s3::S3WebBucket/*"
+            
+      
   # Instance profile role
   ServerInstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - myS3ReadOnlyRole
+        - !Ref S3ReadOnlyRole
 
   ServerConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
