@@ -258,7 +258,7 @@ Resources:
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
-      GroupDescription:  Enables HTTP/HTTPS access via port 80/443 locked down to the load balancer SG and ssh security group
+      GroupDescription:  Enables HTTP/HTTPS access  locked down to the load balancer SG and ssh security group
       SecurityGroupIngress: 
         - IpProtocol: tcp
           FromPort: 80
@@ -272,6 +272,11 @@ Resources:
           FromPort: 22
           ToPort: 22
           SourceSecurityGroupId: !Ref SSHSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
       Tags: 
         - Key: Name
           Value: !Sub ${EnvName}-WebServer Security Group
