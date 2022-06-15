@@ -1,3 +1,4 @@
+AWSTemplateFormatVersion: 2010-09-09
 Description: 
   Harold A | Udacity 2022
   AWS-CloudFormation template for a highly available Udagram app.
@@ -35,9 +36,9 @@ Parameters:
     Type: String
     Default: 10.0.3.0/24
 
-
+# The resources to set up our project
 Resources:
-  VPC:
+  VPC: #we start witht he VPC
     Type: AWS::EC2::VPC
     Properties:
       EnableDnsSupport: true
@@ -49,7 +50,7 @@ Resources:
         - Key: Name
           Value: !Ref EnvName
 
-  IGW:
+  IGW: #Create the internet gateway to allow internet access in and out
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
@@ -58,13 +59,13 @@ Resources:
         - Key: Name
           Value: !Ref EnvName
 
-  IGWAttachment:
+  IGWAttachment: # the internet gateway attachment for the VPC
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref IGW
 
-  PublicSub1:
+  PublicSub1: # the public subnet in AZ 1
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -77,7 +78,7 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvName}-PublicSub(AZ1)
 
-  PublicSub2:
+  PublicSub2: #Public subnet in AZ2
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -90,7 +91,7 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvName}-PublicSub(AZ2)
 
-  PrivateSub1:
+  PrivateSub1: #The private subnet in AZ1
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -103,7 +104,7 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvName}-PrivateSub(AZ1)
 
-  PrivateSub2:
+  PrivateSub2: #Private subnet in AZ2
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -115,3 +116,107 @@ Resources:
           Value: Private
         - Key: Name
           Value: !Sub ${EnvName}-PrivateSub(AZ2)
+
+# Add the elastic Ips for the Nat gateways
+  EIP1:
+    Type: AWS::EC2::EIP
+    DependsOn: IGWyAttachment
+    Properties:
+      Domain: vpc
+
+  EIP2:
+    Type: AWS::EC2::EIP
+    DependsOn: IGWAttachment
+    Properties:
+      Domain: vpc
+
+# Creat the nat gateways
+  NatGW1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt EIP1.AllocationId
+      SubnetId: !Ref PublicSub1
+
+  NatGW2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt EIP2.AllocationId
+      SubnetId: !Ref PublicSub2
+
+  # Routing tables and routes
+  PublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Network
+          Value: Public
+        - Key: Name
+          Value: !Sub ${EnvName}-Public Routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId: !Ref PublicRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+
+  PublicSub1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSub1
+
+  PublicSub2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSub2
+
+  PrivateRT1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Network
+          Value: Private
+        - Key: Name
+          Value: !Sub ${EnvName}-Private Routes (AZ1)
+
+  DefaultPrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGW1
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT1
+      SubnetId: !Ref PrivateSub1
+
+  # The second private route table in case of expansion
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Network
+          Value: Private
+        - Key: Name
+          Value: !Sub ${EnvName}-Private Routes (AZ2)
+
+  DefaultPrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGW2
+
+  PrivateSub2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT2
+      SubnetId: !Ref PrivateSub2
