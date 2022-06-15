@@ -368,16 +368,7 @@ Resources:
       TargetGroupARNs:
         - Ref: AppTargetGroup
 
-#Create the load balancing
-
-  WebAppLB:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Subnets:
-      - !Ref PublicSub1
-      - !Ref PublicSub2
-      SecurityGroups:
-      - Ref: ALBSecurityGroup
+BSecurityGroup
   
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -415,7 +406,16 @@ Resources:
       Port: 8080
       Protocol: HTTP
       UnhealthyThresholdCount: 5
-      VpcId: !Ref VPC
+      VpcId: !Ref VPC#Create the load balancing
+
+  WebAppLB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+      - !Ref PublicSub1
+      - !Ref PublicSub2
+      SecurityGroups:
+      - Ref: AL
         # -Fn::ImportValue: !Sub "${EnvironmentName}-VPC"
 
 #Create S3 bucket
