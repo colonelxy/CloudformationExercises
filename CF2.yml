@@ -57,6 +57,11 @@ Parameters:
     Default: bastionKey
     Type: String
 
+  webbucket: 
+    Description: The S3 bucket to use
+    Default: uapp-webbucket
+    Type: String
+
 
 # The resources to set up our project
 Resources:
@@ -455,29 +460,28 @@ Resources:
             DeleteOnTermination: true
             VolumeType: gp2
       UserData:
-        Fn::Base64: 
-          !Sub |
-            #!/bin/bash
-            apt-get update -y
-            apt-get install apache2 -y
-            systemctl start apache2.service
-            cd /var/www/html
-            mkdir /home/ec2-user/s3-serv
-            aws s3 cp s3://s3webbucket/project2.zip /tmp
-            unzip -d /home/ec2-user/s3-serv /tmp/project2.zip
-
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install unzip awscli -y
+          apt-get install apache2 -y
+          systemctl start apache2.service
+          sudo rm /var/www/html/index.html
+          sudo aws s3 cp s3://uapp-webbucket/project2.zip /var/www/html
+          sudo unzip /var/www/html/project2.zip -d /var/www/html
+          systemctl restart apache2.service
             eecho "it works! Udagram, Udacity" > index.html
 
   #Create S3 bucket
-  webBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "${EnvName}-webbucket"
-      AccessControl: PublicRead
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: error.html
-    DeletionPolicy: Delete
+  # webBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Sub "${EnvName}-webbucket"
+  #     AccessControl: PublicRead
+  #     WebsiteConfiguration:
+  #       IndexDocument: index.html
+  #       ErrorDocument: error.html
+  #   DeletionPolicy: Delete
 # Setup the bastion host
   BastionRole:
       Type: AWS::IAM::Role
@@ -620,4 +624,4 @@ Outputs:
     Description: Application load balancer public url
     Export:
       Name: !Sub ${EnvName}-WebAppLBURL
-    Value: !Join [ "", [http://, !GetAtt WLB.DNSName]]
+    Value: !Join [ "", [http://, !GetAtt LB.DNSName]]
