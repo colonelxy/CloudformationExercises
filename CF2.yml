@@ -340,7 +340,7 @@ Resources:
       VPCZoneIdentifier:
         - !Join [',', [!Ref PrivateSub1, !Ref PrivateSub2 ]]
       LaunchConfigurationName: 
-        Ref: ServerConfig
+        Ref: LaunchConfig
       MinSize: 3
       MaxSize: 5
       DesiredCapacity: 4
@@ -401,7 +401,9 @@ Resources:
   S3ReadOnlyRole:
     Type: AWS::IAM::Role
     Properties:
-      AssumeRolePolicyDocument:
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+        AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
@@ -426,7 +428,7 @@ Resources:
       Roles:
         - !Ref S3ReadOnlyRole
 
-  ServerConfig:
+  LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId: !Ref AMI
