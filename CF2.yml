@@ -501,10 +501,24 @@ Resources:
       Roles:
         - !Ref BastionRole
 
-        # Create the bastion instance
+        # Create the bastion instance profile
   BastionInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: '/'
       Roles:
         - !Ref BastionRole
+
+  BastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:  bastion host security group
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
