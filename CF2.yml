@@ -5,7 +5,6 @@ Description:
 # Declare the parameters
 
 Parameters:
-  Parameters:
   EnvName:
     Description: The environment name to prefix to resource names
     Type: String
@@ -36,3 +35,83 @@ Parameters:
     Type: String
     Default: 10.0.3.0/24
 
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: !Ref VpcCIDR
+      Tags:
+        - Key: Network
+          Value: Public
+        - Key: Name
+          Value: !Ref EnvName
+
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Network
+          Value: Public
+        - Key: Name
+          Value: !Ref EnvName
+
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGW
+
+  PublicSub1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref PublicSub1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Network
+          Value: Public
+        - Key: Name
+          Value: !Sub ${EnvName}-PublicSub(AZ1)
+
+  PublicSub2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Ref PublicSub2CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Network
+          Value: Public
+        - Key: Name
+          Value: !Sub ${EnvName}-PublicSub(AZ2)
+
+  PrivateSub1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref PrivateSub1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Network
+          Value: Private
+        - Key: Name
+          Value: !Sub ${EnvName}-PrivateSub(AZ1)
+
+  PrivateSub2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Ref PrivateSub2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Network
+          Value: Private
+        - Key: Name
+          Value: !Sub ${EnvName}-PrivateSub(AZ2)
