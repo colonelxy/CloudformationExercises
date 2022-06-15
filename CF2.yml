@@ -250,6 +250,27 @@ Resources:
           ToPort: 22
           #CidrIp: !Ref SSHLocation
           CidrIp: 0.0.0.0/0
+
+      # SecurityGroupIngress:
+      #   - IpProtocol: tcp
+      #     FromPort: 80
+      #     ToPort: 80
+      #     CidrIp: 0.0.0.0/0
+      #   - IpProtocol: tcp
+      #     FromPort: 22
+      #     ToPort: 22
+      #     CidrIp:
+      #       Fn::ImportValue: !Sub ${EnvironmentName}-BASTION1-CIDR
+      #   - IpProtocol: tcp
+      #     FromPort: 22
+      #     ToPort: 22
+      #     CidrIp:
+      #       Fn::ImportValue: !Sub ${EnvironmentName}-BASTION2-CIDR
+      #  SecurityGroupEgress:
+      #   - IpProtocol: tcp
+      #     FromPort: 0
+      #     ToPort: 65535
+      #     CidrIp: 0.0.0.0/0
       Tags: 
         - Key: Name
           Value: !Sub ${EnvName}-SSH Security Group
@@ -357,5 +378,29 @@ Resources:
       - !Ref PublicSub2
       SecurityGroups:
       - Ref:  ALBSecurityGroup
+
+  #Create the launch configurations
+
+#Create role policy
+  S3ReadOnlyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 's3:Get'
+                Resource: !Sub "arn:${AWS::Partition}:s3::s3webbucket/*"
        
         
