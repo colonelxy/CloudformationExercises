@@ -574,7 +574,7 @@ Resources:
 
           # Create the second bastion for AZ2
 
-   BastionAZ2:
+  BastionAZ2:
     Type: AWS::EC2::Instance
     DependsOn:
       - BastionSG
@@ -613,3 +613,11 @@ Resources:
         Fn::GetAtt:
           - BastionEIP2
           - AllocationId
+
+
+Outputs:
+  WebAppLBUrl:
+    Description: Application load balancer public url
+    Export:
+      Name: !Sub ${EnvName}-WebAppLBURL
+    Value: !Join [ "", [http://, !GetAtt WLB.DNSName]]
