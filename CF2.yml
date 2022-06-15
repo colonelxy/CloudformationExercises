@@ -120,7 +120,7 @@ Resources:
 # Add the elastic Ips for the Nat gateways
   EIP1:
     Type: AWS::EC2::EIP
-    DependsOn: IGWyAttachment
+    DependsOn: IGWAttachment
     Properties:
       Domain: vpc
 
@@ -187,18 +187,18 @@ Resources:
   DefaultPrivateRoute1:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable1
+      RouteTableId: !Ref PrivateRT1
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGW1
 
-  PrivateSubnet1RouteTableAssociation:
+  PrivateSub1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRT1
       SubnetId: !Ref PrivateSub1
 
   # The second private route table in case of expansion
-  PrivateRouteTable2:
+  PrivateRT2:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
@@ -211,7 +211,7 @@ Resources:
   DefaultPrivateRoute2:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable2
+      RouteTableId: !Ref PrivateRT2
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGW2
 
@@ -220,3 +220,74 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRT2
       SubnetId: !Ref PrivateSub2
+
+  #Let's create the security groups
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: ALB security group enables http/https  traffic on port 80/443
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: !Sub ${EnvName}-ALB Security Group
+      VpcId: !Ref VPC
+
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription:  SSH security group
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          #CidrIp: !Ref SSHLocation
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: !Sub ${EnvName}-SSH Security Group
+      VpcId: !Ref VPC
+
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription:  Enables HTTP/HTTPS access via port 80/443 locked down to the load balancer SG and ssh security group
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref SSHSecurityGroup
+      Tags: 
+        - Key: Name
+          Value: !Sub ${EnvName}-WebServer Security Group
+      VpcId: !Ref VPC
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription:  Open DB for access
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebServerSecurityGroup
+      Tags: 
+        - Key: Name
+          Value: !Sub ${EnvName}-Database Security Group
+      VpcId: !Ref VPC
+        
