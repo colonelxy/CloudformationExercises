@@ -36,6 +36,22 @@ Parameters:
     Type: String
     Default: 10.0.3.0/24
 
+  AMI:
+    Description: The machine image to be used in the launch
+    # Default: ami-005de95e8ff495156
+    Type: String
+
+  InstanceType: 
+    Description: Instance type to use 
+    # Default: t2.medium
+    Type: String
+
+  KeyPair: 
+    Description: key pair to use 
+    # Default: mainKey
+    Type: String
+
+
 # The resources to set up our project
 Resources:
   VPC: #we start witht he VPC
