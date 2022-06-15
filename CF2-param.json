@@ -38,5 +38,9 @@
     {
 		"ParameterKey": "BastionKeyPair",
 		"ParameterValue": "bastionKey"
+	},
+    {
+		"ParameterKey": "webbucket",
+		"ParameterValue": "my-test-bucket-cli-user"
 	}
 ]

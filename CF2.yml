@@ -427,12 +427,12 @@ Resources:
   BucketPolicies:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref webBucket
+      Bucket: !Ref webbucket
       PolicyDocument:
         Statement:
           - Effect: Allow
             Action: s3:*
-            Resource: !Join ["", ["arn:aws:s3:::", !Ref 'webBucket', "/*"]]
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref 'webbucket', "/*"]]
             Principal:
               AWS: "*"
        
