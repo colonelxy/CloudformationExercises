@@ -290,4 +290,67 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvName}-Database Security Group
       VpcId: !Ref VPC
+
+  #Create the autoscaling group
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Join [',', [!Ref PrivateSub1, !Ref PrivateSub2 ]]
+      LaunchConfigurationName: 
+        Ref: ServerConfig
+      MinSize: 3
+      MaxSize: 5
+      DesiredCapacity: 4
+      TargetGroupARNs: !Ref AppTargetGroup
+
+
+  
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref AppTargetGroup
+      LoadBalancerArn: !Ref LB
+      Port: 80
+      Protocol: HTTP
+
+  ALBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref AppTargetGroup
+      Conditions:
+      - Field: path-pattern
+        Values: [/]
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      # TargetType: instance
+      HealthCheckIntervalSeconds: 15
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: !Ref VPC
+      
+      #Create the load balancing
+
+  LB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+      - !Ref PublicSub1
+      - !Ref PublicSub2
+      SecurityGroups:
+      - Ref:  ALBSecurityGroup
+       
         
