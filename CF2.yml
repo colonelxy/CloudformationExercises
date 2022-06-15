@@ -413,14 +413,17 @@ Resources:
             Action:
               - 'sts:AssumeRole'
 #       Path: '/'
-#       # Policies:
-#       #   - PolicyName: root
-#       #     PolicyDocument:
-#       #       Version: '2012-10-17'
-#       #       Statement:
-#       #         - Effect: Allow
-#       #           Action: 's3:Get'
-#       #           Resource: !Sub "arn:${AWS::Partition}:s3::s3webbucket/*"
+    BucketPolicies:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref s3bucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: 's3:Get'
+              Resource: !Join ["", ["arn:aws::s3:::", !Ref s3bucket, "/*"]]
+              Principal:
+                AWS: "*"
        
 #   # Instance profile role
   ServerInstanceProfile:
