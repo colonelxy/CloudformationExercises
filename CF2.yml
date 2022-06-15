@@ -344,8 +344,8 @@ Resources:
       MinSize: 3
       MaxSize: 5
       DesiredCapacity: 4
-      TargetGroupARNs: !Ref AppTargetGroup
-
+      TargetGroupARNs:
+        - !Ref AppTargetGroup
 
   
   ALBListener:
@@ -384,7 +384,7 @@ Resources:
       UnhealthyThresholdCount: 5
       VpcId: !Ref VPC
       
-      #Create the load balancing
+#       #Create the load balancing
 
   LB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -395,15 +395,15 @@ Resources:
       SecurityGroups:
       - Ref:  ALBSecurityGroup
 
-  #Create the launch configurations
+#   #Create the launch configurations
 
-#Create role policy
+# #Create role policy
   S3ReadOnlyRole:
     Type: AWS::IAM::Role
     Properties:
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
-        AssumeRolePolicyDocument:
+      AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
@@ -412,17 +412,17 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - 'sts:AssumeRole'
-        Path: '/'
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: 's3:Get'
-                Resource: !Sub "arn:${AWS::Partition}:s3::s3webbucket/*"
+#       Path: '/'
+#       # Policies:
+#       #   - PolicyName: root
+#       #     PolicyDocument:
+#       #       Version: '2012-10-17'
+#       #       Statement:
+#       #         - Effect: Allow
+#       #           Action: 's3:Get'
+#       #           Resource: !Sub "arn:${AWS::Partition}:s3::s3webbucket/*"
        
-  # Instance profile role
+#   # Instance profile role
   ServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -440,9 +440,11 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ServerInstanceProfile
       BlockDeviceMappings:
-      - DeviceName: "/dev/sdk"
-        Ebs:
-          VolumeSize: '10'
+        - DeviceName: "/dev/sdk"
+          Ebs:
+            VolumeSize: '10'
+            DeleteOnTermination: true
+            VolumeType: gp2
       UserData:
         Fn::Base64: 
           !Sub |
@@ -456,3 +458,14 @@ Resources:
             unzip -d /home/ec2-user/s3-serv /tmp/project2.zip
 
             eecho "it works! Udagram, Udacity" > index.html
+
+  #Create S3 bucket
+  s3bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${EnvName}-bucket"
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+    DeletionPolicy: Delete
