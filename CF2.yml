@@ -515,6 +515,7 @@ Resources:
       Roles:
         - !Ref BastionRole
 
+# Create the bastion security group
   BastionSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -529,6 +530,8 @@ Resources:
           ToPort: 22
           CidrIp: 0.0.0.0/0
 
+
+ # Create the first bastion for AZ1
   BastionAZ1:
     Type: AWS::EC2::Instance
     DependsOn:
@@ -567,4 +570,46 @@ Resources:
       AllocationId:
         Fn::GetAtt:
           - BastionEIP1
+          - AllocationId
+
+          # Create the second bastion for AZ2
+
+   BastionAZ2:
+    Type: AWS::EC2::Instance
+    DependsOn:
+      - BastionSG
+      - BastionInstanceProfile
+    Properties:
+      # UserData:
+      #   Fn::Base64: !Sub |
+      #     #!/bin/bash
+      #     apt-get update -y
+      #     apt-get install unzip awscli -y
+      #     cd /home/ubuntu
+      #     aws s3 cp s3://${S3BucketKeyName}/${bastionKeyPair}.pem /home/lxmint/Documents/Projects/bastionKeyPair.pem
+      IamInstanceProfile: !Ref BastionInstanceProfile
+      SecurityGroupIds:
+        - Ref: BastionSG
+      SubnetId: !Ref PublicSub2
+      ImageId: !Ref AMI
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref BastionKeyPair
+
+  BastionEIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: !Ref VPC
+       
+
+  EIPAssociation2:
+    Type: AWS::EC2::EIPAssociation
+    DependsOn:
+      - BastionAZ2
+      - BastionEIP2
+    Properties:
+      InstanceId:
+        Ref: BastionAZ2
+      AllocationId:
+        Fn::GetAtt:
+          - BastionEIP2
           - AllocationId
