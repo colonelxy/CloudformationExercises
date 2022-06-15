@@ -412,6 +412,7 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - 'sts:AssumeRole'
+        Path: '/'
       Policies:
         - PolicyName: root
           PolicyDocument:
@@ -425,6 +426,7 @@ Resources:
   ServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
+      Path: '/'
       Roles:
         - !Ref S3ReadOnlyRole
 
