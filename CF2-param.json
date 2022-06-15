@@ -22,5 +22,17 @@
     {
         "ParameterKey": "PrivateSub2CIDR",
         "ParameterValue": "10.0.3.0/24"
-    }
+    },
+    {
+		"ParameterKey": "AMI",
+		"ParameterValue": "ami-005de95e8ff495156"
+	},
+	{
+		"ParameterKey": "InstanceType",
+		"ParameterValue": "t2.medium"
+	},
+	{
+		"ParameterKey": "KeyPair",
+		"ParameterValue": "mainKey"
+	}
 ]
