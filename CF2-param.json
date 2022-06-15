@@ -34,5 +34,9 @@
 	{
 		"ParameterKey": "KeyPair",
 		"ParameterValue": "mainKey"
+	},
+    {
+		"ParameterKey": "BastionKeyPair",
+		"ParameterValue": "bastionKey"
 	}
 ]
